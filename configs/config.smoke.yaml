@@ -1,0 +1,59 @@
+# TA-RWARE smoke-test configuration
+
+environment:
+  grid_rows: 4
+  grid_cols: 5
+  n_agvs: 2
+  n_pickers: 1
+  max_steps: 120
+  request_queue_size: 3
+  task_injection_interval: 60
+  picker_service_radius: 2
+
+  battery_capacity: 180.0
+  battery_drain_move: 0.40
+  battery_drain_idle: 0.1
+  battery_recharge_rate: 14.0
+  battery_low_threshold: 0.20
+
+agent:
+  agv_state_dim: 44
+  picker_state_dim: 44
+  action_dim: 5
+  hidden_dims: [128, 64]
+  local_view_radius: 2
+  max_visible_pending_orders: 3
+  max_visible_other_agents: 2
+
+  learning_rate: 0.0005
+  gamma: 0.97
+  epsilon_start: 1.0
+  epsilon_end: 0.05
+  epsilon_decay: 0.998
+
+  buffer_capacity: 5000
+  batch_size: 32
+  target_update_freq: 100
+  update_freq: 8
+
+training:
+  num_episodes: 12
+  save_freq: 6
+  eval_freq: 6
+  eval_episodes: 1
+
+rewards:
+  delivery_complete: 20.0
+  pickup_item: 5.0
+  progress: 0.5
+  move_away: -0.8
+  collision: -1.0
+  time_step: -0.01
+  battery_empty: -6.0
+  picker_assist: 2.0
+  team_bonus: 25.0
+
+logging:
+  log_dir: "logs"
+  model_dir: "models"
+  tensorboard: false

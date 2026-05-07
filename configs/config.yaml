@@ -1,0 +1,64 @@
+# TA-RWARE Final - Tuned Configuration
+# Key fixes:
+#   - Slower epsilon decay so agent explores enough
+#   - Auto-pickup/drop on arrival (no separate ACT needed)
+#   - Larger rewards for delivery, smaller penalties
+#   - More training episodes for convergence
+
+environment:
+  grid_rows: 5
+  grid_cols: 7
+  n_agvs: 3
+  n_pickers: 2
+  max_steps: 600
+  request_queue_size: 5
+  task_injection_interval: 120
+  picker_service_radius: 2
+
+  battery_capacity: 280.0
+  battery_drain_move: 0.40
+  battery_drain_idle: 0.1
+  battery_recharge_rate: 14.0
+  battery_low_threshold: 0.20
+
+agent:
+  agv_state_dim: 57      # 5 + 3 + 4 + (4*2) + (4*3) + 5x5 local grid
+  picker_state_dim: 57
+  action_dim: 5          # N S E W WAIT  (pickup/drop auto on arrival)
+  hidden_dims: [256, 128, 64]
+  local_view_radius: 2
+  max_visible_pending_orders: 4
+  max_visible_other_agents: 4
+
+  learning_rate: 0.0005
+  gamma: 0.97
+  epsilon_start: 1.0
+  epsilon_end: 0.05
+  epsilon_decay: 0.9985  # slower decay - more exploration
+
+  buffer_capacity: 30000
+  batch_size: 64
+  target_update_freq: 300
+  update_freq: 8
+
+training:
+  num_episodes: 3000
+  save_freq: 200
+  eval_freq: 100
+  eval_episodes: 5
+
+rewards:
+  delivery_complete:  32.0   # stronger terminal signal on larger layouts
+  pickup_item:         8.0   # milestone reward for reaching rack
+  progress:            0.6   # encourage long-range navigation progress
+  move_away:          -1.2   # strongly discourage backtracking / oscillation
+  collision:          -1.0   # stronger penalty for inefficient moves
+  time_step:          -0.012 # softer time pressure for larger grid
+  battery_empty:      -6.0   # battery died
+  picker_assist:       2.5   # nearby picker helped at dock
+  team_bonus:         55.0   # all orders done
+
+logging:
+  log_dir:    "logs"
+  model_dir:  "models"
+  tensorboard: true
