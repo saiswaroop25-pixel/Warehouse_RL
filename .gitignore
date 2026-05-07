@@ -1,0 +1,46 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+env/
+
+# Streamlit and local app state
+.streamlit/secrets.toml
+
+# Generated training/runtime outputs
+logs/
+models/
+runs/
+.tmp_report/
+tensorboard/
+*.tfevents.*
+
+# Large model/checkpoint artifacts
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# Generated media and reports that should not be committed by default
+*.mp4
+*.gif
+*.avi
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Temporary files
+*.tmp
+*.log
