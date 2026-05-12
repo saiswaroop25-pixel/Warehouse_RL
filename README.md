@@ -25,6 +25,14 @@ venv\Scripts\python.exe -m pip install -r requirements.txt
 
 ## Run The Dashboard
 
+For presentation/demo use:
+
+```powershell
+.\run_demo.bat
+```
+
+This uses the existing trained checkpoints in `models/` and opens the Streamlit dashboard. Use the `Run` tab to show agents moving and the `Compare policies` tab to show DQN vs greedy vs random evaluation.
+
 ```powershell
 venv\Scripts\streamlit.exe run streamlit_app.py
 ```
