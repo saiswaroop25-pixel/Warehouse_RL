@@ -336,6 +336,8 @@ class WarehouseEnv(gym.Env):
     # ─────────────────────────────────────────────────────────────────────────
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
+        if seed is not None:
+            np.random.seed(seed)
         Order._ctr = 0
 
         free = self._free_aisle_cells()

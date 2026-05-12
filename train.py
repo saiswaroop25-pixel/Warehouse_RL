@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """TA-RWARE Pro v2 - Training Script"""
-import yaml, argparse
+import argparse
+import random
 from pathlib import Path
 import numpy as np
+import torch
+import yaml
 from tqdm import tqdm
 
 from envs.warehouse_env import WarehouseEnv
@@ -28,8 +31,8 @@ def make_agents(env, cfg):
 
 def eval_run(env, dqns, n=3):
     totals = []
-    for _ in range(n):
-        obs, _ = env.reset()
+    for ep in range(n):
+        obs, _ = env.reset(seed=10_000 + ep)
         ep_r, done = 0.0, False
         while not done:
             acts = [dqns[i].act(obs[i], train=False) for i in range(env.n_agents)]
@@ -59,6 +62,16 @@ def build_agent_episode_metrics(env, agent_rewards, info):
 
 def train(cfg_path, device=None, resume=False, run_name=None):
     cfg = load_cfg(cfg_path)
+    seed = cfg.get('training', {}).get('seed', 42)
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    if hasattr(torch.backends, 'cudnn'):
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
     run_name, log_root, model_root, log_dir, model_dir = prepare_run_dirs(
         cfg, resume=resume, run_name=run_name
     )
@@ -88,6 +101,7 @@ def train(cfg_path, device=None, resume=False, run_name=None):
     print(f"  Grid={env.W}x{env.H}  Racks={len(env.rack_cells)}  Goals={len(env.goal_cells)}")
     print(f"  Episodes={n_ep}  MaxSteps={env.max_steps}")
     print(f"  Device: {dqns[0].device}")
+    print(f"  Global seed: {seed}")
     print("=" * 58)
 
     # ── Resume ────────────────────────────────────────────────────────────────
@@ -109,7 +123,7 @@ def train(cfg_path, device=None, resume=False, run_name=None):
 
     # ── Training loop ─────────────────────────────────────────────────────────
     for ep in tqdm(range(start_ep, n_ep+1), desc="Training"):
-        obs, info = env.reset()
+        obs, info = env.reset(seed=seed + ep)
         ep_r  = 0.0
         done  = False
         ep_st = 0

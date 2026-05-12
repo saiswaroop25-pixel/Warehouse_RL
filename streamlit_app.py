@@ -196,11 +196,22 @@ def load_cfg(path: Path) -> dict:
 
 
 def list_model_dirs() -> list[Path]:
-    dirs = [DEFAULT_MODEL_DIR]
+    dirs = []
     run_root = DEFAULT_MODEL_DIR / "runs"
     if run_root.exists():
         dirs.extend(sorted([p for p in run_root.iterdir() if p.is_dir()], reverse=True))
+    dirs.append(DEFAULT_MODEL_DIR)
     return dirs
+
+
+def preferred_model_dir(model_dirs: list[Path]) -> Path:
+    for model_dir in model_dirs:
+        if model_dir.name.startswith("train_") and (model_dir / "agent0_best.pt").exists():
+            return model_dir
+    for model_dir in model_dirs:
+        if (model_dir / "agent0_best.pt").exists():
+            return model_dir
+    return model_dirs[0]
 
 
 def list_config_files() -> list[Path]:
@@ -798,13 +809,13 @@ def main():
 
     model_dirs = list_model_dirs()
     config_files = list_config_files()
+    preferred_model = preferred_model_dir(model_dirs)
     selected_model = st.sidebar.selectbox(
         "Model directory",
         model_dirs,
-        index=0,
+        index=model_dirs.index(preferred_model),
         format_func=lambda p: str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p),
     )
-    selected_model = resolve_run_dir(selected_model)
     selected_config = st.sidebar.selectbox(
         "Fallback config",
         config_files,

@@ -289,12 +289,15 @@ def evaluate_policy(model_dir, cfg_path, num_episodes=10, render=True, device=No
     return summary
 
 
-def compare_policies(model_dir, cfg_path, num_episodes=10, device=None, policies=None):
-    model_dir = resolve_run_dir(model_dir)
+def compare_policies(model_dir, cfg_path, num_episodes=10, device=None, policies=None, seeds=None):
+    model_dir = Path(model_dir)
+    if not (model_dir / "agent0_best.pt").exists():
+        model_dir = resolve_run_dir(model_dir)
     cfg, _ = resolve_eval_config(model_dir, cfg_path)
     log_dir = resolve_run_dir(cfg["logging"]["log_dir"], run_name=model_dir.name)
     eval_dir = Path(log_dir) / "evaluations"
-    seeds = [1000 + ep for ep in range(num_episodes)]
+    seeds = seeds or [1000 + ep for ep in range(num_episodes)]
+    num_episodes = len(seeds)
 
     policies = policies or list(POLICY_CHOICES)
     summaries = {}
@@ -324,14 +327,19 @@ def main():
     p.add_argument("--compare", action="store_true", help="Compare DQN against built-in baselines")
     p.add_argument("--policies", default="dqn,greedy,random",
                    help="Comma-separated policies to compare when --compare is used")
+    p.add_argument("--seeds", default=None,
+                   help="Optional comma-separated seeds, e.g. 1000,1001,1002")
     args = p.parse_args()
 
-    model_dir = resolve_run_dir(args.model_dir)
+    model_dir = Path(args.model_dir)
+    if not (model_dir / "agent0_best.pt").exists():
+        model_dir = resolve_run_dir(model_dir)
+    seeds = [int(s.strip()) for s in args.seeds.split(",") if s.strip()] if args.seeds else None
     if args.compare:
         policies = [p.strip() for p in args.policies.split(",") if p.strip()]
-        compare_policies(model_dir, args.config, args.episodes, device=args.device, policies=policies)
+        compare_policies(model_dir, args.config, args.episodes, device=args.device, policies=policies, seeds=seeds)
     else:
-        evaluate_policy(model_dir, args.config, args.episodes, args.render, args.device, args.policy)
+        evaluate_policy(model_dir, args.config, args.episodes, args.render, args.device, args.policy, seeds=seeds)
 
 
 if __name__ == "__main__":

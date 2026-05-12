@@ -86,6 +86,26 @@ Compare DQN with baselines:
 venv\Scripts\python.exe evaluate.py --model_dir models --config configs\config.yaml --episodes 10 --compare
 ```
 
+Run the deterministic 3-seed comparison used in the project report:
+
+```powershell
+.\run_analysis.bat
+```
+
+Run the environment test suite:
+
+```powershell
+.\run_tests.bat
+```
+
+## Rubric-Focused Documentation
+
+- [Problem Statement and MDP](docs/PROBLEM_STATEMENT.md)
+- [Algorithmic Design Rationale](docs/DESIGN_RATIONALE.md)
+- [RL Concepts](docs/CONCEPTS.md)
+- [Results and Interpretation](docs/RESULTS.md)
+- [Reflection and Limitations](docs/REFLECTION.md)
+
 ## Key Metrics
 
 - Average reward

@@ -20,7 +20,7 @@ agent:
   agv_state_dim: 44
   picker_state_dim: 44
   action_dim: 5
-  hidden_dims: [128, 64]
+  hidden_dims: [256, 128, 64]
   local_view_radius: 2
   max_visible_pending_orders: 3
   max_visible_other_agents: 2
@@ -38,6 +38,7 @@ agent:
 
 training:
   num_episodes: 12
+  seed: 42
   save_freq: 6
   eval_freq: 6
   eval_episodes: 1

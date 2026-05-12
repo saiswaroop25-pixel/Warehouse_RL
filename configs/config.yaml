@@ -43,20 +43,21 @@ agent:
 
 training:
   num_episodes: 3000
+  seed: 42
   save_freq: 200
   eval_freq: 100
   eval_episodes: 5
 
 rewards:
-  delivery_complete:  32.0   # stronger terminal signal on larger layouts
-  pickup_item:         8.0   # milestone reward for reaching rack
-  progress:            0.6   # encourage long-range navigation progress
-  move_away:          -1.2   # strongly discourage backtracking / oscillation
-  collision:          -1.0   # stronger penalty for inefficient moves
-  time_step:          -0.012 # softer time pressure for larger grid
-  battery_empty:      -6.0   # battery died
-  picker_assist:       2.5   # nearby picker helped at dock
-  team_bonus:         55.0   # all orders done
+  delivery_complete:  32.0   # terminal success, 4x pickup reward
+  pickup_item:         8.0   # milestone reward for reaching assigned rack
+  progress:            0.6   # dense guidance, one unit closer to target
+  move_away:          -1.2   # 2x progress penalty to reduce oscillation
+  collision:          -1.0   # invalid wall/agent/rack move penalty
+  time_step:          -0.012 # soft time pressure, 600 steps ~= -7.2 total
+  battery_empty:      -6.0   # severe but recoverable battery failure
+  picker_assist:       2.5   # encourages picker proximity to goal docks
+  team_bonus:         55.0   # cooperative signal for completing all orders
 
 logging:
   log_dir:    "logs"

@@ -1,0 +1,147 @@
+TA-RWARE Rubric Alignment Changes
+Generated: 2026-05-12
+
+Purpose
+-------
+This file documents the changes made to align the TA-RWARE project with the
+provided Reinforcement Learning project evaluation rubric.
+
+1. Problem Formulation
+----------------------
+- Added docs/PROBLEM_STATEMENT.md.
+- Documented the MDP as (S, A, T, R, gamma).
+- Documented the 57-dimensional observation/state vector.
+- Documented the 5-action discrete action space.
+- Documented transition rules including movement, collision, auto-pickup,
+  auto-drop, battery charging, and dynamic order injection.
+- Added novelty statement explaining how TA-RWARE extends a standard warehouse
+  RL problem with battery dynamics, heterogeneous agents, auto-pickup/drop, and
+  Streamlit-based evaluation.
+- Added scale justification for the default warehouse configuration.
+
+2. Algorithmic Design and Model Architecture
+--------------------------------------------
+- Added docs/DESIGN_RATIONALE.md.
+- Explained why Dueling Double DQN was chosen.
+- Compared DQN, PPO, QMIX, independent Q-learning, and Dueling DQN.
+- Documented the hidden layer design and value/advantage decomposition.
+- Added a detailed docstring to agents/network.py explaining:
+  - Q(s,a) = V(s) + A(s,a) - mean(A)
+  - why value/advantage decomposition helps warehouse routing
+  - why mean-centering is used
+  - why the shared backbone plus separate heads are appropriate.
+
+3. Implementation Quality and Reproducibility
+---------------------------------------------
+- Added global training seed support in train.py.
+- Added deterministic seeding for random, NumPy, and PyTorch.
+- Added CUDA seed handling when available.
+- Made episode resets use seed + episode during training.
+- Made eval_run use deterministic evaluation seeds.
+- Fixed envs/warehouse_env.py so env.reset(seed=...) actually produces
+  reproducible initial states by seeding NumPy when a seed is supplied.
+- Added seed: 42 to configs/config.yaml.
+- Added seed: 42 to configs/config.smoke.yaml.
+- Changed configs/config.smoke.yaml hidden_dims to [256, 128, 64] so the smoke
+  config architecture matches the main config pattern.
+- Pinned requirements.txt to the versions installed in the working venv.
+- Added run_tests.bat for one-command test execution.
+- Added tests/test_environment.py with tests for:
+  - state dimension and agent count
+  - normalized observation bounds
+  - reset reproducibility
+  - battery drain
+  - episode truncation
+  - auto-pickup transition.
+
+4. Evaluation and Result Analysis
+---------------------------------
+- Added docs/RESULTS.md.
+- Added deterministic policy comparison artifacts:
+  - docs/results/policy_comparison_summary.csv
+  - docs/results/policy_comparison_raw.csv
+  - docs/results/policy_comparison.png
+- Added smoke training verification artifacts:
+  - docs/results/smoke_metrics.json
+  - docs/results/smoke_training_metrics.png
+  - docs/results/smoke_training_metrics_agents.png
+- Updated evaluate.py with --seeds support for deterministic multi-seed runs.
+- Added run_analysis.bat to run deterministic DQN vs Greedy vs Random evaluation.
+- Documented interpretation of results:
+  - DQN achieves higher delivery completion than baselines.
+  - DQN still has collision/coordination limitations.
+  - Greedy is safer but completes fewer deliveries.
+  - Random confirms the environment is non-trivial.
+
+5. Conceptual Understanding and Viva Preparation
+------------------------------------------------
+- Added docs/CONCEPTS.md.
+- Explained why RL is suitable for the project.
+- Explained the Bellman equation in the project context.
+- Explained exploration vs exploitation and epsilon decay.
+- Explained credit assignment and why auto-pickup/drop matters.
+- Explained independent multi-agent learning and the Markov property.
+
+6. Reflection, Justification, and Original Thinking
+---------------------------------------------------
+- Added docs/REFLECTION.md.
+- Documented what worked well:
+  - auto-pickup/drop
+  - Dueling Double DQN
+  - Streamlit dashboard
+  - policy comparison.
+- Documented what did not fully work:
+  - DQN still has collision issues in multi-agent evaluation.
+- Added a limitations table with future fixes:
+  - QMIX/MAPPO
+  - graph/global observation
+  - prioritized replay
+  - domain randomization
+  - stronger collision-aware reward shaping.
+- Listed original extensions in TA-RWARE.
+
+7. README and Presentation Workflow
+-----------------------------------
+- Updated README.md with links to rubric-focused documentation.
+- Added commands for deterministic analysis and tests.
+- Previously added run_demo.bat for professor presentation.
+- Streamlit dashboard already includes:
+  - live environment view
+  - parameter controls
+  - DQN/Greedy/Random policies
+  - Compare policies tab
+  - policy leaderboard, charts, and CSV export.
+
+Verification Completed
+----------------------
+- Ran unit tests:
+  venv\Scripts\python.exe -m unittest discover -s tests -p "test_*.py"
+  Result: 6 tests passed.
+
+- Ran syntax compilation:
+  venv\Scripts\python.exe -m py_compile train.py evaluate.py streamlit_app.py agents\network.py envs\warehouse_env.py tests\test_environment.py
+  Result: passed.
+
+- Ran deterministic policy analysis:
+  venv\Scripts\python.exe evaluate.py --model_dir models --config configs\config.yaml --compare --seeds 1234,1235,1236
+  Result: completed and saved comparison artifacts.
+
+- Ran smoke training:
+  venv\Scripts\python.exe train.py --config configs\config.smoke.yaml --run_name rubric_smoke_verify
+  Result: completed and generated metrics/plots.
+
+Recommended Presentation Commands
+---------------------------------
+1. Dashboard demo:
+   .\run_demo.bat
+
+2. Deterministic evaluation:
+   .\run_analysis.bat
+
+3. Tests:
+   .\run_tests.bat
+
+Important Note
+--------------
+The models/ and logs/ folders remain gitignored because they can be large.
+The key result evidence has been copied into docs/results/ for reference.
